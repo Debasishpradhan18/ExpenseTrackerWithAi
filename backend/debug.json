@@ -1,0 +1,184 @@
+{
+  "users": [
+    {
+      "uid": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "email": "debasishpradhan826@gmail.com"
+    },
+    {
+      "uid": "pEmMMVAgn9ORAWoq0Q5x6n2BpcO2",
+      "email": "pradhandebasish21731@gmail.com"
+    },
+    {
+      "uid": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "email": "debachiku111@gmail.com"
+    }
+  ],
+  "txCount": 15,
+  "tx": [
+    {
+      "id": "2HVHaUQgAwn2wQRi8iZK",
+      "userId": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "title": "Investment",
+      "amount": 15000,
+      "category": "Investment",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-04-10T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:49:42.801Z"
+    },
+    {
+      "id": "PEqrhE0aw7orYTHRiffM",
+      "userId": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "title": "Mobile/Data",
+      "amount": 899,
+      "category": "Others",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-30T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:47:30.751Z"
+    },
+    {
+      "id": "PbFkczBKXc9G81gVysAG",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "Tea",
+      "amount": 10,
+      "category": "Food & Dining",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-22T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:57:47.576Z"
+    },
+    {
+      "id": "TYq6GlM5pKS1Aifpqf9h",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "Food",
+      "amount": 50,
+      "category": "Food & Dining",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-16T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:54:57.939Z"
+    },
+    {
+      "id": "bkCz0YaxmpQGfaMFLxzw",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "food",
+      "amount": 100,
+      "category": "Food & Dining",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-21T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:57:14.826Z"
+    },
+    {
+      "id": "d542AqkRg4ftc4cOSm8e",
+      "userId": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "title": "Entertainment",
+      "amount": 300,
+      "category": "Entertainment",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-04-02T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:48:11.076Z"
+    },
+    {
+      "id": "kypgKJmganBKqmlAMPB6",
+      "userId": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "title": "Salary",
+      "amount": 100000,
+      "category": "Salary",
+      "subcategory": "",
+      "type": "income",
+      "date": "2026-03-26T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:43:32.676Z"
+    },
+    {
+      "id": "nCUwoafG66k973uJ4HRi",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "Food",
+      "amount": 120,
+      "category": "Food & Dining",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-17T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:55:15.571Z"
+    },
+    {
+      "id": "qI2o79V8hyMCCB5hnNHW",
+      "userId": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "title": "Food",
+      "amount": 100,
+      "category": "Food & Dining",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-04-05T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:49:09.006Z"
+    },
+    {
+      "id": "rvk11MMMTDPIt621LFe9",
+      "userId": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "title": "Education",
+      "amount": 10000,
+      "category": "Education",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-26T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:45:46.324Z"
+    },
+    {
+      "id": "sz32UhimBLGFHxWhb37S",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "Travel",
+      "amount": 40,
+      "category": "Travel",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-25T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:58:12.677Z"
+    },
+    {
+      "id": "vizZCpRejSfhicNgNd7f",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "Lab Record",
+      "amount": 120,
+      "category": "Others",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-18T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:55:46.161Z"
+    },
+    {
+      "id": "wjSn2o8KLPKUFoAfQymT",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "Pocket Money",
+      "amount": 2000,
+      "category": "Others",
+      "subcategory": "",
+      "type": "income",
+      "date": "2026-03-15T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:54:00.764Z"
+    },
+    {
+      "id": "xr89HY9ufvscj3k2g3AL",
+      "userId": "q4cL70tANRZLISQqrLAV1bMFo2n2",
+      "title": "Pocket Mony ",
+      "amount": 1000,
+      "category": "Others",
+      "subcategory": "",
+      "type": "income",
+      "date": "2026-03-20T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:56:55.777Z"
+    },
+    {
+      "id": "ywLyRH9AyHA5lg22d59T",
+      "userId": "R0kh7y9bcefu79sbGw8O2izEtaf1",
+      "title": "Transport",
+      "amount": 50,
+      "category": "Travel",
+      "subcategory": "",
+      "type": "expense",
+      "date": "2026-03-28T00:00:00.000Z",
+      "createdAt": "2026-03-26T19:46:55.406Z"
+    }
+  ]
+}

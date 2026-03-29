@@ -1,3 +1,17 @@
+# Ignore node modules
 node_modules/
+
+# Ignore environment variables
 .env
+.env.*
+*.env
+**/.env
+**/.env.*
+
+# Ignore Firebase service accounts
 serviceAccountKey.json
+**/serviceAccountKey.json
+
+# Ignore build outputs
+dist/
+build/

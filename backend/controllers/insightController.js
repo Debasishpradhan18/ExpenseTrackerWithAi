@@ -55,9 +55,41 @@ exports.getInsights = async (req, res) => {
       });
     }
 
+    // Calculate spend change and savings opportunity
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    
+    let thisMonthExpense = 0;
+    let lastMonthExpense = 0;
+    
+    expenses.forEach(ex => {
+      if (!ex.date) return;
+      const exDate = new Date(ex.date);
+      const exMonth = exDate.getMonth();
+      const exYear = exDate.getFullYear();
+      
+      if (exYear === currentYear && exMonth === currentMonth) {
+        thisMonthExpense += parseFloat(ex.amount) || 0;
+      } else if ((exYear === currentYear && exMonth === currentMonth - 1) || (currentMonth === 0 && exYear === currentYear - 1 && exMonth === 11)) {
+        lastMonthExpense += parseFloat(ex.amount) || 0;
+      }
+    });
+
+    const spendChange = thisMonthExpense - lastMonthExpense;
+    
+    // Suggest 10% of expenses as savings opportunity
+    let savingsOpportunity = 0;
+    if (thisMonthExpense > 0) {
+      savingsOpportunity = thisMonthExpense * 0.10;
+    } else if (totalExpense > 0) {
+      // Fallback if there are expenses but none match the current month's date
+      savingsOpportunity = totalExpense * 0.10;
+    }
+
     return res.json({
-      spendChange: 0,
-      savingsOpportunity: 0,
+      spendChange,
+      savingsOpportunity,
       highlights
     });
 

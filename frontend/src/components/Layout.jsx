@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { logout, isDemoMode } from '../services/firebase';
 import { LogOut, Home, PieChart, LayoutDashboard, PlusCircle, CreditCard, ChevronRight, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import Footer from './Footer';
+import Feedback from './Feedback';
 
 export default function Layout() {
   const { user, demoLogout } = useAuth();
@@ -154,10 +156,12 @@ export default function Layout() {
           </div>
         )}
 
-        <main className="flex-1 overflow-y-auto w-full">
-          <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto w-full flex flex-col relative">
+          <div className="p-4 md:p-8 max-w-7xl mx-auto w-full flex-1">
             <Outlet />
           </div>
+          <Footer />
+          <Feedback />
         </main>
       </div>
     </div>

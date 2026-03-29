@@ -35,7 +35,7 @@ export default function Dashboard() {
   }
 
   const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
-  const showConfetti = data.summary.balance > 10000; // Arbitrary milestone or savings goal
+  const showConfetti = false; // Disabled the confetti celebration
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -117,7 +117,6 @@ export default function Dashboard() {
                       <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
                   <YAxis tickLine={false} axisLine={false} tick={{fill: '#64748b', fontSize: 12}} width={40} />
                   <Tooltip 

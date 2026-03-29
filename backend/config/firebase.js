@@ -6,7 +6,13 @@ const path = require('path');
 const serviceAccountPath = path.join(__dirname, '..', 'serviceAccountKey.json');
 
 try {
-  if (fs.existsSync(serviceAccountPath)) {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    console.log("Firebase Admin: Found FIREBASE_SERVICE_ACCOUNT env var. Initializing securely.");
+    const serviceAccountContent = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccountContent)
+    });
+  } else if (fs.existsSync(serviceAccountPath)) {
     console.log("Firebase Admin: Found serviceAccountKey.json. Initializing securely.");
     admin.initializeApp({
       credential: admin.credential.cert(require(serviceAccountPath))

@@ -72,8 +72,10 @@ export default function Transactions() {
       fetchTransactions();
       setFormData({ title: '', amount: '', category: 'Food & Dining', type: 'expense', date: new Date().toISOString().split('T')[0] });
     } catch (err) {
-      console.error(err);
-      alert("Error saving transaction: " + (err.response?.data?.error || err.message));
+      console.error('Save error details:', err);
+      // Construct the full URL for better debugging
+      const fullUrl = err.config ? `${err.config.baseURL || ''}${err.config.url}` : 'unknown url';
+      alert(`Error saving transaction: ${err.response?.data?.error || err.message}\n\nTried to reach: ${fullUrl}\n\nPlease check your VITE_API_URL environment variable in Vercel.`);
     }
   };
 

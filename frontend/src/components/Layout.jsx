@@ -1,5 +1,6 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.png';
 import { logout, isDemoMode } from '../services/firebase';
 import { LogOut, Home, PieChart, LayoutDashboard, PlusCircle, CreditCard, ChevronRight, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -46,10 +47,8 @@ export default function Layout() {
       {/* Sidebar Desktop */}
       <aside className="hidden w-64 md:flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-center h-20 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="SmartExpense Logo" className="w-8 h-8 rounded-lg object-contain bg-slate-100 dark:bg-slate-800 p-1" />
             <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight">SmartExpense</h1>
           </div>
         </div>
@@ -112,9 +111,7 @@ export default function Layout() {
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between h-16 px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
+            <img src={logo} alt="SmartExpense Logo" className="w-8 h-8 rounded-lg object-contain bg-slate-100 dark:bg-slate-800 p-1" />
             <span className="font-semibold text-slate-800 dark:text-slate-100">SmartExpense</span>
           </div>
           <div className="flex items-center gap-3">

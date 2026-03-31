@@ -1,4 +1,5 @@
 import { Github, Twitter, Linkedin, Heart } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Footer() {
   return (
@@ -8,9 +9,7 @@ export default function Footer() {
           
           <div className="flex flex-col items-center md:items-start text-center md:text-left md:w-1/2">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-xs">S</span>
-              </div>
+              <img src={logo} alt="SmartExpense Logo" className="w-6 h-6 rounded object-contain bg-slate-100 dark:bg-slate-800 p-0.5" />
               <span className="font-semibold text-slate-800 dark:text-slate-100">SmartExpense</span>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400">

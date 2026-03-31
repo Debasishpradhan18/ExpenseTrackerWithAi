@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.png';
 import { loginWithGoogle, registerWithEmail, loginWithEmail, isDemoMode } from '../services/firebase';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Mail, Lock, UserPlus, LogIn, AlertCircle } from 'lucide-react';
@@ -58,7 +59,8 @@ export default function Login() {
         
         <div className="relative z-10 max-w-lg text-white space-y-8">
           <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm">
-            ✨ SmartExpense Tracker
+            <img src={logo} alt="Logo" className="w-5 h-5 rounded object-contain bg-white p-0.5" />
+            SmartExpense Tracker
           </div>
           <h1 className="text-5xl font-bold leading-tight">Take Control of Your Finances Today</h1>
           <p className="text-xl text-primary-foreground/80 leading-relaxed">
@@ -81,9 +83,9 @@ export default function Login() {
       {/* Right side - Form */}
       <div className="flex-1 flex flex-col justify-center w-full px-4 sm:px-6 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:max-w-md">
-          <div className="mb-10 lg:hidden text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-xl mb-4">
-              <span className="text-white font-bold text-2xl">S</span>
+          <div className="mb-10 lg:hidden text-center flex flex-col items-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-slate-100 dark:bg-slate-800 p-2 border border-slate-200 dark:border-slate-700">
+              <img src={logo} alt="SmartExpense Logo" className="w-full h-full object-contain" />
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">SmartExpense</h2>
           </div>

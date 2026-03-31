@@ -2,7 +2,7 @@ import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
 import { logout, isDemoMode } from '../services/firebase';
-import { LogOut, Home, PieChart, LayoutDashboard, PlusCircle, CreditCard, ChevronRight, Sun, Moon } from 'lucide-react';
+import { LogOut, Home, PieChart, LayoutDashboard, PlusCircle, CreditCard, ChevronRight, Sun, Moon, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Footer from './Footer';
 import Feedback from './Feedback';
@@ -11,6 +11,7 @@ export default function Layout() {
   const { user, demoLogout } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -103,6 +104,13 @@ export default function Layout() {
             {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
+          <button
+            onClick={() => setIsFeedbackOpen(true)}
+            className="flex items-center gap-2 w-full mt-2 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Send Feedback</span>
+          </button>
         </div>
       </aside>
 
@@ -146,7 +154,17 @@ export default function Layout() {
                 {link.name}
               </Link>
             ))}
-            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 w-full text-left text-red-600 rounded-lg hover:bg-red-50">
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsFeedbackOpen(true);
+              }}
+              className="flex items-center gap-3 px-4 py-3 w-full text-left text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 font-medium"
+            >
+              <MessageSquare className="w-5 h-5" />
+              Send Feedback
+            </button>
+            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 w-full text-left text-red-600 rounded-lg hover:bg-red-50 font-medium">
               <LogOut className="w-5 h-5" />
               Sign Out
             </button>
@@ -158,7 +176,7 @@ export default function Layout() {
             <Outlet />
           </div>
           <Footer />
-          <Feedback />
+          <Feedback isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
         </main>
       </div>
     </div>

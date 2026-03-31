@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Star, Send, X } from 'lucide-react';
 
-export default function Feedback() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Feedback({ isOpen, onClose }) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -13,38 +12,31 @@ export default function Feedback() {
     // In a real app, send to backend here
     setSubmitted(true);
     setTimeout(() => {
-      setIsOpen(false);
+      onClose();
       setSubmitted(false);
       setRating(0);
       setFeedback('');
     }, 2000);
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
-      {/* Floating Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 p-4 bg-primary text-white rounded-full shadow-lg hover:bg-primary-dim hover:shadow-primary/50 transition-all z-50 flex items-center justify-center group"
-      >
-        <Star className="w-6 h-6 group-hover:scale-110 transition-transform" />
-      </button>
-
       {/* Modal / Widget */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative border border-slate-200 dark:border-slate-800">
-            {/* Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Send Feedback</h3>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative border border-slate-200 dark:border-slate-800">
+          {/* Header */}
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Send Feedback</h3>
+            <button 
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
             {/* Content */}
             <div className="p-6">
@@ -114,7 +106,6 @@ export default function Feedback() {
             </div>
           </div>
         </div>
-      )}
     </>
   );
 }

@@ -1,24 +1,99 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, TrendingUp, TrendingDown, Target, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Lightbulb, TrendingUp, TrendingDown, Target, ShieldCheck, AlertCircle, Brain } from 'lucide-react';
 import api from '../services/api';
 
+// --- Behavior Detection Feature ---
+// Clean, beginner-friendly JS function using standard array methods
+function analyzePatterns(transactions) {
+  if (!transactions || transactions.length === 0) return [];
+  
+  const patterns = [];
+  
+  // Filter out incomes, we only care about expenses
+  const expenses = transactions.filter(t => t.type === 'expense');
+  if (expenses.length === 0) return patterns;
+
+  let weekendSpend = 0;
+  let weekdaySpend = 0;
+  const categoryMap = {};
+  let lateNightCount = 0;
+
+  // Process all expenses using forEach
+  expenses.forEach(t => {
+    const date = new Date(t.date);
+    const amount = Number(t.amount) || 0;
+    
+    // 1. Detect Weekend Spending (0 = Sunday, 6 = Saturday)
+    const dayOfWeek = date.getDay(); 
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      weekendSpend += amount;
+    } else {
+      weekdaySpend += amount;
+    }
+    
+    // 2. Group expenses by category
+    const cat = t.category || 'Other';
+    categoryMap[cat] = (categoryMap[cat] || 0) + amount;
+    
+    // 3. Detect Late-Night Spending (After 10 PM)
+    const hour = date.getHours();
+    if (hour >= 22 || hour <= 4) {
+      lateNightCount++;
+    }
+  });
+
+  // Calculate Weekend Pattern
+  if (weekendSpend > weekdaySpend && weekendSpend > 0) {
+    patterns.push(`You spend more on weekends than weekdays.`);
+  }
+
+  // Calculate Top Category Pattern
+  let topCategory = '';
+  let highestAmount = 0;
+  for (const [cat, amt] of Object.entries(categoryMap)) {
+    if (amt > highestAmount) {
+      highestAmount = amt;
+      topCategory = cat;
+    }
+  }
+  
+  if (topCategory) {
+    patterns.push(`${topCategory} is your top expense category.`);
+  }
+
+  // Calculate Late Night Pattern
+  if (lateNightCount > 1) {
+    patterns.push("Late-night spending spike detected.");
+  }
+
+  return patterns;
+}
+
 export default function Insights() {
-  const [insights, setInsights] = useState(null);
+  const [data, setData] = useState({ insights: null, patterns: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchInsights = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/insights');
-        setInsights(res.data);
+        // Fetch both Insights API and Transactions API simultaneously
+        const [insightsRes, txRes] = await Promise.all([
+          api.get('/insights'),
+          api.get('/transactions')
+        ]);
+        
+        setData({
+          insights: insightsRes.data,
+          patterns: analyzePatterns(txRes.data)
+        });
       } catch (err) {
-        console.error("Failed to fetch insights", err);
+        console.error("Failed to fetch data for insights", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchInsights();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -28,6 +103,8 @@ export default function Insights() {
       </div>
     );
   }
+
+  const { insights, patterns } = data;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -56,6 +133,28 @@ export default function Insights() {
         </div>
       </div>
 
+      {/* 🧠 Spending Patterns UI */}
+      {patterns.length > 0 && (
+        <motion.div variants={itemVariants} className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-3xl shadow-sm border border-indigo-100 dark:border-indigo-800/50">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-xl shadow-sm">
+              <Brain className="w-5 h-5" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">🧠 Spending Patterns</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {patterns.map((pattern, idx) => (
+              <div key={idx} className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex items-start gap-3 hover:-translate-y-1 transition-transform">
+                <div className="mt-1 flex-shrink-0 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500"></div>
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{pattern}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Backend Highlights */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
@@ -85,7 +184,7 @@ export default function Insights() {
       </div>
 
       <motion.div variants={itemVariants}>
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 mt-4">Key Highlights</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 mt-6">Key Highlights</h2>
         <div className="space-y-4">
           {insights?.highlights && insights.highlights.length > 0 ? (
             insights.highlights.map((highlight, idx) => (

@@ -1,4 +1,13 @@
 const { db } = require('../config/firebase');
+const { OpenAI } = require('openai');
+
+const isGroq = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.startsWith('gsk_');
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY || 'mock-key',
+  baseURL: isGroq ? "https://api.groq.com/openai/v1" : undefined
+});
+const AI_MODEL = isGroq ? "llama-3.1-8b-instant" : "gpt-3.5-turbo";
+
 exports.getInsights = async (req, res) => {
   try {
     let expenses = [];
@@ -26,7 +35,7 @@ exports.getInsights = async (req, res) => {
     const highlights = [];
     if (Object.keys(categories).length > 0) {
       const topCategory = Object.keys(categories).reduce((a, b) => categories[a] > categories[b] ? a : b);
-      highlights.push({
+       highlights.push({
         type: 'warning',
         title: `High spend on ${topCategory}`,
         description: `You've spent ₹${categories[topCategory].toFixed(2)} on ${topCategory}. Try to reduce this by 10% next month.`
@@ -101,10 +110,57 @@ exports.getInsights = async (req, res) => {
 
 exports.postChat = async (req, res) => {
   try {
-    const { message } = req.body;
-    return res.json({ reply: "I am an AI assistant. How can I help you regarding your finances today?" });
+    const { message, transactions = [] } = req.body;
+
+    if (!process.env.OPENAI_API_KEY) {
+      return res.json({ reply: "OpenAI API key is missing. Please configure it in your environment variables to use real AI analysis." });
+    }
+
+    // Summarize data for AI
+    let totalIncome = 0;
+    let totalExpense = 0;
+    const catMap = {};
+
+    transactions.forEach(t => {
+      if (t.type === 'income') {
+        totalIncome += parseFloat(t.amount);
+      } else {
+        totalExpense += parseFloat(t.amount);
+        const cat = t.category || 'Other';
+        catMap[cat] = (catMap[cat] || 0) + parseFloat(t.amount);
+      }
+    });
+
+    const summary = `
+Total Income: ₹${totalIncome.toFixed(2)}
+Total Expense: ₹${totalExpense.toFixed(2)}
+Expense Categories Breakdown:
+${Object.entries(catMap).map(([k, v]) => `- ${k}: ₹${v.toFixed(2)}`).join('\n')}
+    `;
+
+    const systemPrompt = `You are a smart financial assistant. Analyze the user's transaction data and answer their questions in a simple, helpful, and human-friendly way. Give actionable advice. Keep responses short and clear.
+
+User's Financial Summary:
+${summary}
+
+Recent Transactions Context (up to last 10):
+${JSON.stringify(transactions.slice(0, 10).map(t => ({ amount: t.amount, type: t.type, category: t.category, date: t.date.split('T')[0] })))}
+    `;
+
+    const completion = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message }
+      ],
+      temperature: 0.5,
+    });
+
+    const aiMessage = completion.choices[0].message.content;
+    
+    return res.json({ reply: aiMessage });
   } catch (error) {
     console.error('Chat error:', error);
-    return res.status(500).json({ error: 'Failed to process chat request.' });
+    return res.status(500).json({ error: 'Failed to process chat request.', details: error.message });
   }
 };

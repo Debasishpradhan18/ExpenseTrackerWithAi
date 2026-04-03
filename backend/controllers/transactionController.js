@@ -1,7 +1,12 @@
 const { db } = require('../config/firebase');
 const { OpenAI } = require('openai');
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'mock-key' });
+const isGroq = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.startsWith('gsk_');
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY || 'mock-key',
+  baseURL: isGroq ? "https://api.groq.com/openai/v1" : undefined
+});
+const AI_MODEL = isGroq ? "llama-3.1-8b-instant" : "gpt-3.5-turbo";
 
 exports.autoCategorize = async (req, res) => {
   const { title } = req.body;
@@ -46,7 +51,7 @@ Return output ONLY in JSON format:
 Expense: "${title}"`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0,
     });
@@ -165,6 +170,7 @@ exports.getDashboardData = async (req, res) => {
         balance: totalIncome - totalExpense
       },
       transactions: transactions.slice(0, 5), // last 5
+      allTransactions: transactions,
       chartData: chartData.slice(-30),
       categoryData
     });

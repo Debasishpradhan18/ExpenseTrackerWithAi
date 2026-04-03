@@ -6,7 +6,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, DollarSign, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Confetti from 'react-confetti';
-
+import MoneySurvivalPrediction from '../components/MoneySurvivalPrediction';
 export default function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState({ summary: {}, transactions: [], chartData: [], categoryData: [] });
@@ -65,7 +65,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 relative overflow-hidden group hover:shadow-lg transition-all">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all"></div>
           <div className="flex items-center justify-between pointer-events-none mb-4">
@@ -98,6 +98,11 @@ export default function Dashboard() {
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-white">₹{data.summary.expense?.toFixed(2) || '0.00'}</p>
         </motion.div>
+
+        <MoneySurvivalPrediction 
+          transactions={data.allTransactions || []} 
+          balance={data.summary.balance || 0} 
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

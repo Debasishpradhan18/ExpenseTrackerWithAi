@@ -1,104 +1,179 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { format } from 'date-fns';
 import api from '../services/api';
-import { Lightbulb, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 export default function Insights() {
-  const [insights, setInsights] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState([]);
+  const [messages, setMessages] = useState([
+    { 
+      id: 1, 
+      text: "Hello! I am your AI Financial Assistant. Ask me anything about your expenses.", 
+      sender: "ai", 
+      timestamp: new Date() 
+    }
+  ]);
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const endOfMessagesRef = useRef(null);
 
   useEffect(() => {
-    const fetchInsights = async () => {
+    const fetchTransactions = async () => {
       try {
-        const res = await api.get('/insights');
-        setInsights(res.data);
+        const res = await api.get('/transactions');
+        setTransactions(res.data);
       } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch transactions for AI", err);
       }
     };
-    fetchInsights();
+    fetchTransactions();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-        <div className="relative flex w-16 h-16">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/40 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-16 w-16 bg-primary/20 items-center justify-center">
-            <Lightbulb className="w-8 h-8 text-primary animate-pulse" />
-          </span>
-        </div>
-        <p className="text-slate-500 font-medium">Generating AI Insights...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userQuery = input.trim();
+    const userMsg = { 
+      id: Date.now(), 
+      text: userQuery, 
+      sender: 'user', 
+      timestamp: new Date() 
+    };
+    
+    setMessages(prev => [...prev, userMsg]);
+    setInput("");
+    setIsTyping(true);
+
+    try {
+      // Call real AI backend route
+      const res = await api.post('/insights/chat', { 
+        message: userQuery,
+        transactions: transactions // Pass transaction context to backend
+      });
+      
+      const aiMsg = { 
+        id: Date.now() + 1, 
+        text: res.data.reply || "Sorry, I couldn't process that.", 
+        sender: 'ai', 
+        timestamp: new Date() 
+      };
+      setMessages(prev => [...prev, aiMsg]);
+    } catch (error) {
+      console.error("AI chat error:", error);
+      const serverDetails = error.response?.data?.details || error.response?.data?.error;
+      const userFacingMsg = serverDetails ? `Server Error: ${serverDetails}` : "Sorry, I am having trouble connecting to my servers right now.";
+      
+      const errorMsg = { 
+        id: Date.now() + 1, 
+        text: userFacingMsg, 
+        sender: 'ai', 
+        timestamp: new Date() 
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-          AI Financial Insights
-          <span className="px-3 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-full border border-primary/20">Beta</span>
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">Smart suggestions based on your spending patterns.</p>
+    <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
+      
+      <div className="flex items-center gap-3">
+        <div className="p-2.5 bg-primary/10 rounded-xl text-primary border border-primary/20 shadow-sm">
+          <Sparkles className="w-6 h-6" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">AI Assistant</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-sm">Ask questions about your spending patterns.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-gradient-to-br from-primary to-purple-800 p-8 rounded-3xl text-white shadow-xl shadow-primary/20 relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-white/20 transition-all duration-700"></div>
-          
-          <div className="relative z-10 flex flex-col h-full justify-between">
-            <div>
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/20">
-                <Lightbulb className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-2xl font-semibold mb-2">Monthly Summary</h2>
-              <p className="text-primary-foreground/80 leading-relaxed mb-6">
-                Based on our analysis, your spending is <strong className="text-white">{insights?.spendChange > 0 ? "higher" : insights?.spendChange < 0 ? "lower" : "stable"}</strong> compared to last month.
-              </p>
-            </div>
+      <div className="flex-1 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* Chat Area */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 z-10 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => (
+              <motion.div 
+                key={msg.id}
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                className={`flex gap-3 max-w-[85%] ${msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
+              >
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
+                  msg.sender === 'user' 
+                    ? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900' 
+                    : 'bg-primary text-white'
+                }`}>
+                  {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                </div>
+                
+                <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                  <div className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed ${
+                    msg.sender === 'user' 
+                      ? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 rounded-tr-sm' 
+                      : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700/50 rounded-tl-sm'
+                  }`}>
+                    {msg.text}
+                  </div>
+                  <span className="text-[11px] text-slate-400 mt-1.5 px-1 font-medium">
+                    {format(msg.timestamp, 'h:mm a')}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
             
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-primary-foreground/70 mb-1">Estimated Savings Opportunity</p>
-                <p className="text-2xl font-bold">₹{insights?.savingsOpportunity?.toFixed(2) || '45.00'}</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-            </div>
+            {isTyping && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex gap-3 max-w-[80%] mr-auto"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div className="px-5 py-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div ref={endOfMessagesRef} />
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 z-10">
+          <form onSubmit={handleSend} className="relative flex items-center">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about your spending..."
+              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-full py-3.5 pl-5 pr-14 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[15px]"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isTyping}
+              className="absolute right-2 p-2 bg-primary text-white rounded-full hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors shadow-sm"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+          <div className="text-center mt-3">
+             <span className="text-xs text-slate-400 font-medium tracking-wide">AI Assistant can make mistakes. Consider verifying important information.</span>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white px-2">Key Highlights</h3>
-          
-          {(insights?.highlights || []).map((highlight, index) => (
-            <div key={index} className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex gap-4 transition-transform hover:-translate-y-1">
-              <div className={`mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                highlight.type === 'warning' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
-                highlight.type === 'positive' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-              }`}>
-                {highlight.type === 'warning' ? <AlertTriangle className="w-5 h-5" /> : 
-                 highlight.type === 'positive' ? <CheckCircle2 className="w-5 h-5" /> : 
-                 <TrendingDown className="w-5 h-5" />}
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-900 dark:text-white mb-1">{highlight.title}</h4>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{highlight.description}</p>
-              </div>
-            </div>
-          ))}
-          
-          {(!insights?.highlights || insights.highlights.length === 0) && (
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 text-center">
-              <p className="text-slate-500">Not enough data to generate insights yet. Keep adding transactions!</p>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

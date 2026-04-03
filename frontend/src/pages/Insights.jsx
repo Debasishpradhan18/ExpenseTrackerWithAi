@@ -1,180 +1,135 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Sparkles } from 'lucide-react';
-import { format } from 'date-fns';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Lightbulb, TrendingUp, TrendingDown, Target, ShieldCheck, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 
 export default function Insights() {
-  const [transactions, setTransactions] = useState([]);
-  const [messages, setMessages] = useState([
-    { 
-      id: 1, 
-      text: "Hello! I am your AI Financial Assistant. Ask me anything about your expenses.", 
-      sender: "ai", 
-      timestamp: new Date() 
-    }
-  ]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const endOfMessagesRef = useRef(null);
+  const [insights, setInsights] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchInsights = async () => {
       try {
-        const res = await api.get('/transactions');
-        setTransactions(res.data);
+        const res = await api.get('/insights');
+        setInsights(res.data);
       } catch (err) {
-        console.error("Failed to fetch transactions for AI", err);
+        console.error("Failed to fetch insights", err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchTransactions();
+    fetchInsights();
   }, []);
 
-  useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
 
-    const userQuery = input.trim();
-    const userMsg = { 
-      id: Date.now(), 
-      text: userQuery, 
-      sender: 'user', 
-      timestamp: new Date() 
-    };
-    
-    setMessages(prev => [...prev, userMsg]);
-    setInput("");
-    setIsTyping(true);
-
-    try {
-      // Call real AI backend route
-      const res = await api.post('/insights/chat', { 
-        message: userQuery,
-        transactions: transactions // Pass transaction context to backend
-      });
-      
-      const aiMsg = { 
-        id: Date.now() + 1, 
-        text: res.data.reply || "Sorry, I couldn't process that.", 
-        sender: 'ai', 
-        timestamp: new Date() 
-      };
-      setMessages(prev => [...prev, aiMsg]);
-    } catch (error) {
-      console.error("AI chat error:", error);
-      const serverDetails = error.response?.data?.details || error.response?.data?.error;
-      const userFacingMsg = serverDetails ? `Server Error: ${serverDetails}` : "Sorry, I am having trouble connecting to my servers right now.";
-      
-      const errorMsg = { 
-        id: Date.now() + 1, 
-        text: userFacingMsg, 
-        sender: 'ai', 
-        timestamp: new Date() 
-      };
-      setMessages(prev => [...prev, errorMsg]);
-    } finally {
-      setIsTyping(false);
-    }
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4 animate-in fade-in duration-500 max-w-4xl mx-auto w-full">
-      
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-6 max-w-5xl mx-auto"
+    >
       <div className="flex items-center gap-3">
         <div className="p-2.5 bg-primary/10 rounded-xl text-primary border border-primary/20 shadow-sm">
-          <Sparkles className="w-6 h-6" />
+          <Lightbulb className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">AI Assistant</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-sm">Ask questions about your spending patterns.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Smart Insights</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5 text-sm">Automated analysis of your financial health.</p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-        {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 z-10 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
-          <AnimatePresence initial={false}>
-            {messages.map((msg) => (
-              <motion.div 
-                key={msg.id}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                className={`flex gap-3 max-w-[85%] ${msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
-              >
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${
-                  msg.sender === 'user' 
-                    ? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900' 
-                    : 'bg-primary text-white'
-                }`}>
-                  {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                </div>
-                
-                <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed ${
-                    msg.sender === 'user' 
-                      ? 'bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900 rounded-tr-sm' 
-                      : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700/50 rounded-tl-sm'
-                  }`}>
-                    {msg.text}
-                  </div>
-                  <span className="text-[11px] text-slate-400 mt-1.5 px-1 font-medium">
-                    {format(msg.timestamp, 'h:mm a')}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-            
-            {isTyping && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex gap-3 max-w-[80%] mr-auto"
-              >
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div className="px-5 py-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div ref={endOfMessagesRef} />
-        </div>
-
-        {/* Input Area */}
-        <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 z-10">
-          <form onSubmit={handleSend} className="relative flex items-center">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about your spending..."
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-full py-3.5 pl-5 pr-14 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-[15px]"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isTyping}
-              className="absolute right-2 p-2 bg-primary text-white rounded-full hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors shadow-sm"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
-          <div className="text-center mt-3">
-             <span className="text-xs text-slate-400 font-medium tracking-wide">AI Assistant can make mistakes. Consider verifying important information.</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <h3 className="font-semibold text-slate-700 dark:text-slate-200">Savings Opportunity</h3>
           </div>
-        </div>
+          <p className="text-4xl font-bold text-slate-900 dark:text-white mb-2">₹{insights?.savingsOpportunity?.toFixed(2) || '0.00'}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Potential monthly savings if you optimize your top expenses.</p>
+        </motion.div>
 
+        <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 relative overflow-hidden group">
+          <div className={`absolute -right-4 -top-4 w-32 h-32 rounded-full blur-3xl transition-all ${insights?.spendChange > 0 ? 'bg-red-500/10 group-hover:bg-red-500/20' : 'bg-green-500/10 group-hover:bg-green-500/20'}`}></div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`p-2 rounded-xl ${insights?.spendChange > 0 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' : 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400'}`}>
+              {insights?.spendChange > 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+            </div>
+            <h3 className="font-semibold text-slate-700 dark:text-slate-200">Month-over-Month Spending</h3>
+          </div>
+          <p className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+            {insights?.spendChange > 0 ? '+' : ''}₹{insights?.spendChange?.toFixed(2) || '0.00'}
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Compared to your spending last month.</p>
+        </motion.div>
       </div>
-    </div>
+
+      <motion.div variants={itemVariants}>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 mt-4">Key Highlights</h2>
+        <div className="space-y-4">
+          {insights?.highlights && insights.highlights.length > 0 ? (
+            insights.highlights.map((highlight, idx) => (
+              <div key={idx} className={`p-5 rounded-2xl border flex gap-4 items-start ${
+                highlight.type === 'positive' 
+                  ? 'bg-green-50/50 border-green-100 dark:bg-green-900/10 dark:border-green-900/30'
+                  : highlight.type === 'warning'
+                    ? 'bg-amber-50/50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/30'
+                    : 'bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30'
+              }`}>
+                <div className={`mt-0.5 p-2 rounded-full flex-shrink-0 ${
+                  highlight.type === 'positive' ? 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400' :
+                  highlight.type === 'warning' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400' :
+                  'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
+                }`}>
+                  {highlight.type === 'positive' ? <Target className="w-5 h-5" /> : 
+                   highlight.type === 'warning' ? <AlertCircle className="w-5 h-5" /> : 
+                   <Lightbulb className="w-5 h-5" />}
+                </div>
+                <div>
+                  <h4 className={`font-semibold text-lg mb-1 ${
+                    highlight.type === 'positive' ? 'text-green-800 dark:text-green-300' :
+                    highlight.type === 'warning' ? 'text-amber-800 dark:text-amber-300' :
+                    'text-blue-800 dark:text-blue-300'
+                  }`}>
+                    {highlight.title}
+                  </h4>
+                  <p className={`text-sm ${
+                    highlight.type === 'positive' ? 'text-green-700/80 dark:text-green-400/80' :
+                    highlight.type === 'warning' ? 'text-amber-700/80 dark:text-amber-400/80' :
+                    'text-blue-700/80 dark:text-blue-400/80'
+                  }`}>
+                    {highlight.description}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+              <p className="text-slate-500">Add more transactions to generate personalized highlights.</p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }

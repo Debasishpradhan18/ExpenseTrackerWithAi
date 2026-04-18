@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Smart Expense Tracker with AI Insights - Presentation</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/dracula.min.css" id="theme">
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/monokai.min.css" id="highlight-theme">
+    
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none;
+        }
+        .reveal .slide-number {
+            font-size: 24px;
+        }
+        .highlight-text {
+            color: #ff79c6;
+        }
+        .feature-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        ul.tech-list li {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Slide 1: Title -->
+            <section>
+                <h1>Smart Expense Tracker</h1>
+                <h3>with <span class="highlight-text">AI Insights</span></h3>
+                <p>
+                    <small>Track, Analyze, and Predict Your Spending Patterns</small>
+                </p>
+                <p style="margin-top: 50px;">
+                    <em>Interactive Presentation Deck</em>
+                </p>
+            </section>
+
+            <!-- Slide 2: Problem Statement -->
+            <section>
+                <h2>Problem Statement</h2>
+                <div class="feature-box">
+                    <ul>
+                        <li><span class="highlight-text">Lack of Awareness:</span> Users struggle to keep track of daily small expenses leading to overspending.</li>
+                        <li><span class="highlight-text">Manual Effort:</span> Traditional tracking involves tedious manual entry and complicated spreadsheets.</li>
+                        <li><span class="highlight-text">No Predictive Insights:</span> Existing tools only show past data without offering future alerts or smart savings advice.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 3: The Solution -->
+            <section>
+                <h2>Our Solution</h2>
+                <p>A comprehensive web application that automates financial tracking while providing actionable intelligence.</p>
+                <ul>
+                    <li class="fragment">Seamless Authentication (Email & Google)</li>
+                    <li class="fragment">Interactive & Real-time Dashboards</li>
+                    <li class="fragment">Intelligent Alerts for high-spending patterns</li>
+                    <li class="fragment">Cloud-synced data for accessibility everywhere</li>
+                </ul>
+            </section>
+
+            <!-- Slide 4: Technology Stack -->
+            <section>
+                <section>
+                    <h2>Technology Stack</h2>
+                    <p>Modern, Scalable, and Fast</p>
+                </section>
+                <section>
+                    <h3>Frontend</h3>
+                    <ul class="tech-list">
+                        <li><strong>React.js:</strong> Component-based UI formulation</li>
+                        <li><strong>Tailwind CSS (v4):</strong> Rapid, responsive styling</li>
+                        <li><strong>Recharts:</strong> Dynamic, interactive data visualization</li>
+                        <li><strong>Vite:</strong> Ultra-fast frontend tooling</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Backend & Database</h3>
+                    <ul class="tech-list">
+                        <li><strong>Node.js & Express.js:</strong> REST API architecture</li>
+                        <li><strong>Firebase Firestore:</strong> NoSQL real-time cloud database</li>
+                        <li><strong>Firebase Auth:</strong> Secure user authentication</li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- Slide 5: System Architecture -->
+            <section>
+                <h2>System Architecture</h2>
+                <div class="feature-box" style="font-size: 0.8em; text-align: left;">
+                    <p><strong>1. Client Layer:</strong> React SPA communicating via HTTP requests.</p>
+                    <p><strong>2. API Layer:</strong> Express.js handling routing and business logic.</p>
+                    <p><strong>3. Authentication Layer:</strong> Firebase Auth tokens verified by backend.</p>
+                    <p><strong>4. Data Layer:</strong> Firestore storing Collections for Users and Transactions.</p>
+                    <p><strong>5. AI/Insights Engine:</strong> Rule-based and predictive models generating alerts on recent spending.</p>
+                </div>
+            </section>
+
+            <!-- Slide 6: Key Features -->
+            <section>
+                <h2>Key Features</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="feature-box">
+                        <h4>📊 Dashboard</h4>
+                        <p style="font-size: 0.7em;">Aggregated stats, dynamic charts, and financial summaries at a glance.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🛡️ Security</h4>
+                        <p style="font-size: 0.7em;">Robust login with OAuth (Google) and traditional Email/Password.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🤖 AI Insights</h4>
+                        <p style="font-size: 0.7em;">Generates actionable advice and warnings based on spending trends.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>📱 Responsive</h4>
+                        <p style="font-size: 0.7em;">Optimized for desktop, tablet, and mobile viewing seamlessly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: API Endpoints (Backend) -->
+            <section>
+                <h2>REST API Overview</h2>
+                <pre><code data-trim data-noescape class="language-http">
+# Transactions
+GET    /api/transactions/dashboard 
+GET    /api/transactions/
+POST   /api/transactions/
+DELETE /api/transactions/:id
+
+# Insights
+GET    /api/insights/
+                </code></pre>
+                <p><small>Secured with Bearer Authentication tokens mapped to Firebase.</small></p>
+            </section>
+
+            <!-- Slide 8: Database Schema -->
+            <section>
+                <h2>Database Design (Firestore)</h2>
+                <div class="feature-box" style="text-align: left;">
+                    <p><strong>Collections:</strong></p>
+                    <ul>
+                        <li><code>users</code> - Stores user profiles and preferences.</li>
+                        <li><code>transactions</code> - Documents include:
+                            <ul style="font-size: 0.8em;">
+                                <li><code>userId</code> (Reference)</li>
+                                <li><code>title</code> (String)</li>
+                                <li><code>amount</code> (Number)</li>
+                                <li><code>category</code> (String)</li>
+                                <li><code>type</code> ('income' or 'expense')</li>
+                                <li><code>date</code> (Timestamp)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 9: The AI Component -->
+            <section>
+                <h2>Predictive & Smart Insights</h2>
+                <p>How our app goes beyond normal tracking:</p>
+                <ul style="font-size: 0.8em;">
+                    <li class="fragment"><span class="highlight-text">Categorical Analysis:</span> Detects which category consumes the most budget incrementally.</li>
+                    <li class="fragment"><span class="highlight-text">Survival Prediction:</span> Estimates how many days current funds will last at the current burn rate.</li>
+                    <li class="fragment"><span class="highlight-text">Intelligent Alerts:</span> High-spending warnings triggered dynamically when thresholds are breached.</li>
+                </ul>
+            </section>
+
+            <!-- Slide 10: Future Enhancements -->
+            <section>
+                <h2>Future Enhancements</h2>
+                <ul>
+                    <li>Integration with Open Banking APIs for automatic syncing</li>
+                    <li>Receipt scanning utilizing Optical Character Recognition (OCR)</li>
+                    <li>Advanced Deep Learning models for precise future expense forecasting</li>
+                    <li>Budget sharing and family accounts</li>
+                </ul>
+            </section>
+
+            <!-- Slide 11: Demo / Walkthrough -->
+            <section>
+                <h2>Live Demonstration</h2>
+                <p>Let's take a look at the application in action.</p>
+                <p style="font-size: 0.6em; margin-top: 40px;">
+                    <em>(Switch over to localhost / deployed application)</em>
+                </p>
+            </section>
+
+            <!-- Slide 12: Q&A -->
+            <section>
+                <h2>Thank You!</h2>
+                <p>Any Questions?</p>
+                <div style="margin-top: 50px;">
+                    <small>Built with ❤️ using React, Node, and Firebase</small>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+    
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            transition: 'slide', // none/fade/slide/convex/concave/zoom
+            
+            // Learn about plugins: https://revealjs.com/plugins/
+            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+        });
+    </script>
+</body>
+</html>

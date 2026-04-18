@@ -1,4 +1,4 @@
-const { db } = require('../config/firebase');
+const Transaction = require('../models/Transaction');
 const { OpenAI } = require('openai');
 
 const isGroq = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.startsWith('gsk_');
@@ -14,7 +14,6 @@ exports.autoCategorize = async (req, res) => {
   if (!title) return res.status(400).json({ error: "Title is required" });
 
   if (!process.env.OPENAI_API_KEY) {
-    // Basic mock fallback if no API key is set
     const lower = title.toLowerCase();
     let cat = "Others";
     let sub = "General";
@@ -56,7 +55,6 @@ Expense: "${title}"`;
       temperature: 0,
     });
     
-    // Parse the JSON output safely
     const responseText = completion.choices[0].message.content.replace(/```json/g, '').replace(/```/g, '').trim();
     const result = JSON.parse(responseText);
     res.json(result);
@@ -71,13 +69,8 @@ exports.getTransactions = async (req, res) => {
     if (req.user.uid === 'demo-123') {
       return res.json([...global.mockTransactions].sort((a, b) => new Date(b.date) - new Date(a.date)));
     }
-    const snapshot = await db.collection('transactions')
-      .where('userId', '==', req.user.uid)
-      .get();
-      
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    data.sort((a, b) => new Date(b.date) - new Date(a.date));
-    res.json(data);
+    const transactions = await Transaction.find({ userId: req.user.uid }).sort({ date: -1 });
+    res.json(transactions);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -92,19 +85,18 @@ exports.addTransaction = async (req, res) => {
       amount: parseFloat(amount),
       category,
       subcategory: subcategory || '',
-      type, // 'income' or 'expense'
-      date: new Date(date).toISOString(),
-      createdAt: new Date().toISOString()
+      type,
+      date: new Date(date),
     };
     
     if (req.user.uid === 'demo-123') {
       const mockId = Math.random().toString(36).substr(2, 9);
       global.mockTransactions.push({ id: mockId, ...txData });
-      return res.status(201).json({ id: mockId, message: 'Transaction added successfully (Mock)' });
+      return res.status(201).json({ _id: mockId, message: 'Transaction added successfully (Mock)' });
     }
 
-    const docRef = await db.collection('transactions').add(txData);
-    res.status(201).json({ id: docRef.id, message: 'Transaction added successfully' });
+    const tx = await Transaction.create(txData);
+    res.status(201).json({ _id: tx._id, message: 'Transaction added successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -116,7 +108,7 @@ exports.deleteTransaction = async (req, res) => {
       global.mockTransactions = global.mockTransactions.filter(t => t.id !== req.params.id);
       return res.json({ message: 'Transaction deleted successfully (Mock)' });
     }
-    await db.collection('transactions').doc(req.params.id).delete();
+    await Transaction.findByIdAndDelete(req.params.id);
     res.json({ message: 'Transaction deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -129,11 +121,7 @@ exports.getDashboardData = async (req, res) => {
     if (req.user.uid === 'demo-123') {
       transactions = [...global.mockTransactions].sort((a, b) => new Date(b.date) - new Date(a.date));
     } else {
-      const snapshot = await db.collection('transactions')
-        .where('userId', '==', req.user.uid)
-        .get();
-      transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+      transactions = await Transaction.find({ userId: req.user.uid }).sort({ date: -1 });
     }
     
     let totalIncome = 0;
@@ -142,26 +130,31 @@ exports.getDashboardData = async (req, res) => {
     const chartDataMap = {};
     
     transactions.forEach(tx => {
-      if (tx.type === 'income') {
-        totalIncome += tx.amount;
+      // Create simplified object since Mongoose document properties behave differently
+      const t = tx.toObject ? tx.toObject() : tx;
+      
+      if (t.type === 'income') {
+        totalIncome += t.amount;
       } else {
-        totalExpense += tx.amount;
-        
-        categoryTotals[tx.category] = (categoryTotals[tx.category] || 0) + tx.amount;
+        totalExpense += t.amount;
+        categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
       }
       
-      const dateKey = tx.date.split('T')[0];
-      if (!chartDataMap[dateKey]) chartDataMap[dateKey] = { date: dateKey, income: 0, expense: 0 };
+      // Get 'YYYY-MM-DD'
+      const dateStr = new Date(t.date).toISOString().split('T')[0];
+      if (!chartDataMap[dateStr]) chartDataMap[dateStr] = { date: dateStr, income: 0, expense: 0 };
       
-      chartDataMap[dateKey][tx.type] += tx.amount;
+      chartDataMap[dateStr][t.type] += t.amount;
     });
 
     const categoryData = Object.entries(categoryTotals)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
-    // Get last 30 days
     const chartData = Object.values(chartDataMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Send uniform object where _id is added/mapped appropriately
+    const formattedData = transactions.map(t => typeof t.toObject === 'function' ? t.toObject() : t);
 
     res.json({
       summary: {
@@ -169,8 +162,8 @@ exports.getDashboardData = async (req, res) => {
         expense: totalExpense,
         balance: totalIncome - totalExpense
       },
-      transactions: transactions.slice(0, 5), // last 5
-      allTransactions: transactions,
+      transactions: formattedData.slice(0, 5),
+      allTransactions: formattedData,
       chartData: chartData.slice(-30),
       categoryData
     });

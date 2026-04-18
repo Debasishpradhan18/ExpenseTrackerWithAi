@@ -1,14 +1,13 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
-import { logout, isDemoMode } from '../services/firebase';
 import { LogOut, Home, PieChart, LayoutDashboard, PlusCircle, CreditCard, ChevronRight, Sun, Moon, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Footer from './Footer';
 import Feedback from './Feedback';
 
 export default function Layout() {
-  const { user, demoLogout } = useAuth();
+  const { user, logoutUser } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
@@ -29,8 +28,7 @@ export default function Layout() {
   }, [isDarkMode]);
 
   const handleLogout = async () => {
-    await logout();
-    if (isDemoMode) demoLogout();
+    logoutUser();
   };
 
   if (!user) {

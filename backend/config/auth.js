@@ -1,4 +1,4 @@
-const { admin } = require('./firebase');
+const jwt = require('jsonwebtoken');
 
 const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -15,8 +15,10 @@ const verifyToken = async (req, res, next) => {
   }
   
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    req.user = decodedToken; // contains uid, email, etc.
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-for-dev');
+    // For compatibility with previous firebase req.user structure, we use uid instead of id,
+    // but the JWT holds .id
+    req.user = { uid: decoded.id };
     next();
   } catch (error) {
     console.error('Token verification failed:', error);

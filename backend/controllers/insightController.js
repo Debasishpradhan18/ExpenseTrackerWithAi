@@ -1,4 +1,4 @@
-const { db } = require('../config/firebase');
+const Transaction = require('../models/Transaction');
 const { OpenAI } = require('openai');
 
 const isGroq = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.startsWith('gsk_');
@@ -15,12 +15,7 @@ exports.getInsights = async (req, res) => {
       global.mockTransactions = global.mockTransactions || [];
       expenses = global.mockTransactions.filter(t => t.type === 'expense');
     } else {
-      const snapshot = await db.collection('transactions')
-        .where('userId', '==', req.user.uid)
-        .where('type', '==', 'expense')
-        .get();
-        
-      expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      expenses = await Transaction.find({ userId: req.user.uid, type: 'expense' });
     }
     
     // Aggregate by category locally

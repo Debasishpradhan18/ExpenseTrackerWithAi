@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
-import { loginWithGoogle, registerWithEmail, loginWithEmail, isDemoMode } from '../services/firebase';
+import { loginWithGoogle, registerWithEmail, loginWithEmail } from '../services/authService';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Mail, Lock, UserPlus, LogIn, AlertCircle } from 'lucide-react';
 
 export default function Login() {
-  const { user, demoLogin } = useAuth();
+  const { user, loginUser } = useAuth();
   const navigate = useNavigate();
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,26 +26,30 @@ export default function Login() {
     try {
       let result;
       if (isRegistering) {
-        result = await registerWithEmail(email, password);
+        result = await registerWithEmail(email, password, name);
       } else {
         result = await loginWithEmail(email, password);
       }
-      if (isDemoMode) demoLogin(result.user);
+      loginUser(result.user);
       navigate('/');
     } catch (err) {
-      setError(err.message.replace('Firebase:', '').trim());
+      setError(err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogle = async () => {
+    setError('');
+    setLoading(true);
     try {
       const result = await loginWithGoogle();
-      if (isDemoMode) demoLogin(result.user);
+      loginUser(result.user);
       navigate('/');
     } catch (err) {
-      setError(err.message.replace('Firebase:', '').trim());
+      setError(err.response?.data?.error || err.message || 'Google login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,6 +116,25 @@ export default function Login() {
 
             <form onSubmit={handleEmailAuth} className="space-y-5 flex flex-col">
               <div className="space-y-4">
+                {isRegistering && (
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <UserPlus className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-3 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow text-slate-900 dark:text-white sm:text-sm"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
                   <div className="relative">

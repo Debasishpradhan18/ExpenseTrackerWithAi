@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, isDemoMode } from '../services/firebase';
+import { logout as authServiceLogout } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -11,25 +10,28 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isDemoMode) {
-      // In demo mode, we start logged out but simulate instantly.
-      setLoading(false);
-      return;
-    }
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsubscribe && unsubscribe();
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+    }
+    setLoading(false);
   }, []);
 
-  // For Demo Mode injection
-  const demoLogin = (mockUser) => setUser(mockUser);
-  const demoLogout = () => setUser(null);
+  const loginUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
+  const logoutUser = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    authServiceLogout();
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, demoLogin, demoLogout }}>
+    <AuthContext.Provider value={{ user, loading, loginUser, logoutUser }}>
       {!loading && children}
     </AuthContext.Provider>
   );
